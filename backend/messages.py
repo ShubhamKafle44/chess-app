@@ -1,2 +1,3 @@
 INIT_GAME =  "init_game"
-MOVES = "moves"
+MOVE = "move"
+GAME_OVER = "game_over"

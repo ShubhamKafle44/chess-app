@@ -1,44 +1,36 @@
-// GamePage.js
-import React, { useState } from "react";
-import Board from "../components/Board";
-import useSocket from "../hooks/useSocket";
-import { useEffect } from "react";
-import { Chess } from "chess.js";
-import { GAME_OVER, INIT_GAME } from "../components/Messages";
-const Game = ({ gameId, color }) => {
-  const socket = useSocket();
-  // const [board, setBoard] = useState(Chess());
-  const [fen, setfen] = useState(Chess());
+import React, { useState, useEffect } from "react";
+import ChessBoard from "../components/ChessBoard";
+import Button from "../components/Button";
+import io from "socket.io-client";
+import { INIT_GAME, PATH, WS_URL } from "../components/Messages";
+
+export default function App({ sdf }) {
+  const [showChessboard, setShowChessboard] = useState(false); // State to toggle between button and chessboard
+
+  var socket = null;
+
   useEffect(() => {
     if (!socket) {
-      return;
+      socket = io(WS_URL, { path: PATH });
+      console.log("socket created", socket);
     }
-    //Initialize  a game first:
-    socket.emit("play", INIT_GAME);
-    //send moves;
-    socket.emit("message");
-    socket.on("message", (event) => {
-      const message = JSON.parse(event.data);
-      console.log(message);
-      switch (message.type) {
-        case INIT_GAME:
-          console.log("Game inititalized");
-          break;
-        case MOVE:
-          console.log("Game inititalized");
-          break;
-        case GAME_OVER:
-          console.log("Game inititalized");
-          break;
-      }
-    });
-  });
+  }, []);
+
+  const handleClick = () => {
+    setShowChessboard(true); // Show the chessboard when button is clicked
+    //Connect to the backend
+    socket.emit("handle_message", { type: INIT_GAME });
+  };
+
   return (
-    <div className="">
-      {GAME_OVER && <h2>{GAME_OVER}</h2>}
-      <Board fen={fen} makeMove={makeMove} />
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      {showChessboard ? (
+        <div className="w-[50%] h-[50%] shadow-lg rounded">
+          <ChessBoard socket={socket} />
+        </div>
+      ) : (
+        <Button handleClick={handleClick} />
+      )}
     </div>
   );
-};
-
-export default Game;
+}
